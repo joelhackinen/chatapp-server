@@ -1,10 +1,8 @@
-const express = require('express')
-const app = express()
+const app = require('./app')
 const http = require('http')
+const config = require('./utils/config')
 const { Server } = require('socket.io')
-const cors = require('cors')
 
-app.use(cors())
 const server = http.createServer(app)
 
 const io = new Server(server, {
@@ -16,12 +14,19 @@ const io = new Server(server, {
 io.on('connection', (socket) => {
   console.log(`user connected: ${socket.id}`)
 
-  socket.on('send_message', (data) => {
-    console.log(data)
-    socket.broadcast.emit('receive_message', data)
+  socket.on('send-message', (data, room) => {
+    if (room === '') {
+      socket.broadcast.emit('receive-message', data)
+    } else {
+      socket.to(room).emit('receive-message', data)
+    }
+  })
+
+  socket.on('join-room', (room) => {
+    socket.join(room)
   })
 })
 
-server.listen(3001, () => {
+server.listen(config.PORT || 3001, () => {
   console.log('Server is running')
 })
