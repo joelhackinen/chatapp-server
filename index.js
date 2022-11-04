@@ -15,15 +15,17 @@ io.on('connection', (socket) => {
   console.log(`user connected: ${socket.id}`)
 
   socket.on('send-message', (data, room) => {
-    if (room === '') {
-      socket.broadcast.emit('receive-message', data)
-    } else {
+    if (room !== '') {
       socket.to(room).emit('receive-message', data)
     }
   })
 
   socket.on('join-room', (room) => {
     socket.join(room)
+  })
+
+  socket.on('leave-room', (room) => {
+    socket.leave(room)
   })
 })
 
